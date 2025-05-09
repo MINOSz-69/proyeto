@@ -16,6 +16,23 @@ connection.connect((err) => {
     }
     console.log('Conexión exitosa a la base de datos');
 });
+// Método para guardar un nuevo registro en la base de datos
+function guardarUsuario(nombre, correo, contraseña, callback) {
+    const query = 'INSERT INTO usuarios (nombre, correo, contraseña) VALUES (?, ?, ?)';
+    const values = [nombre, correo, contraseña];
 
-// Exportar la conexión para usarla en otros archivos
-module.exports = connection;
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error al guardar el usuario:', err);
+            return callback(err);
+        }
+        console.log('Usuario guardado con éxito:', results);
+        callback(null, results);
+    });
+}
+
+// Exportar el método
+module.exports = {
+    guardarUsuario,
+    // Otros métodos exportados...
+};
