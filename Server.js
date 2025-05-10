@@ -27,13 +27,53 @@ app.post('/guardar', (req, res) => {
     });
 });
 
-// Exportar métodos del controlador como ejemplo
-app.get('/data', (req, res) => {
-    controlador.getData((err, data) => {
+// Ruta para mostrar el formulario de actualización
+app.get('/actualizar/:id', (req, res) => {
+    const { id } = req.params;
+
+    controlador.consultarUsuarioPorId(id, (err, usuario) => {
         if (err) {
-            return res.status(500).send('Error al obtener datos');
+            return res.status(500).send('Error al consultar el usuario');
         }
-        res.render('data', { data }); // Renderizar datos en una vista EJS
+        if (!usuario) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+        res.render('actualizar', { usuario }); // Renderizar la vista actualizar.ejs con los datos del usuario
+    });
+});
+
+// Ruta para procesar la actualización de un usuario
+app.post('/actualizar/:id', (req, res) => {
+    const { id } = req.params;
+    const { nombre, correo } = req.body;
+
+    controlador.actualizarUsuario(id, nombre, correo, (err, results) => {
+        if (err) {
+            return res.status(500).send('Error al actualizar el usuario');
+        }
+        res.redirect('/usuarios'); // Redirigir a la lista de usuarios
+    });
+});
+
+// Ruta para eliminar un usuario
+app.post('/eliminar/:id', (req, res) => {
+    const { id } = req.params;
+
+    controlador.eliminarUsuario(id, (err, results) => {
+        if (err) {
+            return res.status(500).send('Error al eliminar el usuario');
+        }
+        res.redirect('/usuarios'); // Redirigir a la lista de usuarios
+    });
+});
+
+// Ruta para consultar todos los usuarios y renderizar la vista
+app.get('/usuarios', (req, res) => {
+    controlador.consultarUsuarios((err, results) => {
+        if (err) {
+            return res.status(500).send('Error al consultar los usuarios');
+        }
+        res.render('usuarios', { usuarios: results }); // Renderizar la vista usuarios.ejs con los datos
     });
 });
 
