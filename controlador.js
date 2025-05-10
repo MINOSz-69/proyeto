@@ -118,7 +118,42 @@ function actualizarUsuario(id, nombre, correo, callback) {
     });
 }
 
-// Exportar los métodos
+// Método para buscar un usuario por ID
+function buscarUsuarioPorId(id, callback) {
+    const query = 'SELECT * FROM usuarios WHERE id = ?';
+    const values = [id];
+
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error al buscar el usuario:', err);
+            return callback(err);
+        }
+        if (results.length === 0) {
+            return callback(new Error('No se encontró un usuario con el ID proporcionado'));
+        }
+        console.log('Usuario encontrado:', results[0]);
+        callback(null, results[0]); // Retornar el primer usuario encontrado
+    });
+}
+// Método para manejar el inicio de sesión
+function iniciarSesion(correo, contra, callback) {
+    const query = 'SELECT * FROM usuarios WHERE correo = ? AND contra = ?';
+    const values = [correo, contra];
+
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error al iniciar sesión:', err);
+            return callback(err);
+        }
+        if (results.length === 0) {
+            return callback(new Error('Correo o contraseña incorrectos'));
+        }
+        console.log('Inicio de sesión exitoso:', results[0]);
+        callback(null, results[0]); // Retornar el usuario encontrado
+    });
+}
+
+// Exportar el método
 module.exports = {
     guardarUsuario,
     verificarDuplicados,
@@ -126,5 +161,7 @@ module.exports = {
     consultarUsuarios,
     consultarUsuarioPorId,
     actualizarUsuario,
+    buscarUsuarioPorId,
+    iniciarSesion, // Nuevo método exportado
     // Otros métodos exportados...
 };

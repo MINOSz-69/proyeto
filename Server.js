@@ -76,6 +76,44 @@ app.get('/usuarios', (req, res) => {
         res.render('usuarios', { usuarios: results }); // Renderizar la vista usuarios.ejs con los datos
     });
 });
+// Ruta para consultar un usuario por ID
+app.get('/usuario', (req, res) => {
+    const { id } = req.query; // Obtener el ID del parámetro de consulta
+
+    if (!id) {
+        return res.status(400).send('Debe proporcionar un ID para buscar');
+    }
+
+    controlador.consultarUsuarioPorId(id, (err, usuario) => {
+        if (err) {
+            if (err.message === 'No se encontró un usuario con el ID proporcionado') {
+                return res.status(404).send(err.message);
+            }
+            return res.status(500).send('Error al consultar el usuario');
+        }
+        res.render('usuario', { usuario }); // Renderizar la vista usuario.ejs con los datos del usuario
+    });
+});
+
+// Ruta para mostrar el formulario de inicio de sesión
+app.get('/login', (req, res) => {
+    res.render('login'); // Renderizar la vista login.ejs
+});
+
+// Ruta para manejar el inicio de sesión
+app.post('/login', (req, res) => {
+    const { correo, contra } = req.body;
+
+    controlador.iniciarSesion(correo, contra, (err, usuario) => {
+        if (err) {
+            if (err.message === 'Correo o contraseña incorrectos') {
+                return res.status(401).send(err.message); // Credenciales incorrectas
+            }
+            return res.status(500).send('Error al iniciar sesión'); // Error general
+        }
+        res.send(`Bienvenido, ${usuario.nombre}`); // Respuesta de éxito
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
