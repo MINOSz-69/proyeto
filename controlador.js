@@ -59,9 +59,72 @@ function guardarUsuario(nombre, correo, contra, callback) {
     });
 }
 
+// Método para eliminar un usuario de la base de datos
+function eliminarUsuario(id, callback) {
+    const query = 'DELETE FROM usuarios WHERE id = ?';
+    const values = [id];
+
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error al eliminar el usuario:', err);
+            return callback(err);
+        }
+        if (results.affectedRows === 0) {
+            return callback(new Error('No se encontró un usuario con el ID proporcionado'));
+        }
+        console.log('Usuario eliminado con éxito:', results);
+        callback(null, results);
+    });
+}
+
+// Método para consultar todos los usuarios de la base de datos
+function consultarUsuarios(callback) {
+    const query = 'SELECT * FROM usuarios';
+
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al consultar los usuarios:', err);
+            return callback(err);
+        }
+        console.log('Usuarios consultados con éxito:', results);
+        callback(null, results);
+    });
+}
+// Método para consultar un usuario por ID
+function consultarUsuarioPorId(id, callback) {
+    const query = 'SELECT * FROM usuarios WHERE id = ?';
+    const values = [id];
+
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error al consultar el usuario:', err);
+            return callback(err);
+        }
+        callback(null, results[0]); // Retornar el primer usuario encontrado
+    });
+}
+
+// Método para actualizar un usuario
+function actualizarUsuario(id, nombre, correo, callback) {
+    const query = 'UPDATE usuarios SET nombre = ?, correo = ? WHERE id = ?';
+    const values = [nombre, correo, id];
+
+    connection.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error al actualizar el usuario:', err);
+            return callback(err);
+        }
+        callback(null, results);
+    });
+}
+
 // Exportar los métodos
 module.exports = {
     guardarUsuario,
     verificarDuplicados,
+    eliminarUsuario,
+    consultarUsuarios,
+    consultarUsuarioPorId,
+    actualizarUsuario,
     // Otros métodos exportados...
 };
