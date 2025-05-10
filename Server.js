@@ -65,7 +65,7 @@ app.post('/eliminar/:id', (req, res) => {
         }
         res.redirect('/usuarios'); // Redirigir a la lista de usuarios
     });
-});
+}); 
 
 // Ruta para consultar todos los usuarios y renderizar la vista
 app.get('/usuarios', (req, res) => {
