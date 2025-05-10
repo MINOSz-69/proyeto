@@ -39,6 +39,9 @@
         .form-container button:hover {
             background-color: #6a11cb;
         }
+        .error {
+            border: 2px solid red;
+        }
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -54,7 +57,7 @@
 <body>
     <div class="form-container col-md-4">
         <h1>Registro de Usuario</h1>
-        <form action="/guardar" method="POST">
+        <form id="registroForm" action="/guardar" method="POST">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
@@ -64,8 +67,16 @@
                 <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingresa tu correo" required>
             </div>
             <div class="mb-3">
-                <label for="contraseña" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="contraseña" name="contraseña" placeholder="Crea una contraseña" required>
+                <label for="contra" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="contra" name="contra" placeholder="Crea una contraseña" required>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="mostrarContra">
+                    <label class="form-check-label" for="mostrarContra">Mostrar contraseña</label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="confirmarContra" class="form-label">Confirmar Contraseña</label>
+                <input type="password" class="form-control" id="confirmarContra" name="confirmarContra" placeholder="Confirma tu contraseña" required>
             </div>
             <button type="submit" class="btn btn-primary w-100">Registrar</button>
         </form>
@@ -73,5 +84,29 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mostrar u ocultar la contraseña
+        document.getElementById('mostrarContra').addEventListener('change', function () {
+            const contra = document.getElementById('contra');
+            contra.type = this.checked ? 'text' : 'password';
+        });
+
+        // Validar que las contraseñas coincidan antes de enviar el formulario
+        document.getElementById('registroForm').addEventListener('submit', function (e) {
+            const contra = document.getElementById('contra');
+            const confirmarContra = document.getElementById('confirmarContra');
+
+            // Resetear estilos de error
+            contra.classList.remove('error');
+            confirmarContra.classList.remove('error');
+
+            if (contra.value !== confirmarContra.value) {
+                e.preventDefault(); // Evitar el envío del formulario
+                alert('Las contraseñas no coinciden. Por favor, verifica.');
+                contra.classList.add('error');
+                confirmarContra.classList.add('error');
+            }
+        });
+    </script>
 </body>
 </html>
