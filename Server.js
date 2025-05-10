@@ -95,10 +95,31 @@ app.get('/usuario', (req, res) => {
     });
 });
 
+// Ruta para mostrar pagina de principal
+app.get('/principal', (req, res) => {
+    res.render('principal'); // Renderizar la vista principal.ejs
+});
+
+// Ruta para manejar el inicio de sesión
+app.post('/login', (req, res) => {
+    const { correo, contra } = req.body;
+
+    controlador.iniciarSesion(correo, contra, (err, usuario) => {
+        if (err) {
+            if (err.message === 'Correo o contraseña incorrectos') {
+                return res.status(401).send(err.message); // Credenciales incorrectas
+            }
+            return res.status(500).send('Error al iniciar sesión'); // Error general
+        }
+        res.render('principal', { usuario }); // Renderizar la vista principal.ejs
+    });
+});
+
 // Ruta para mostrar el formulario de inicio de sesión
 app.get('/login', (req, res) => {
     res.render('login'); // Renderizar la vista login.ejs
 });
+
 
 // Ruta para manejar el inicio de sesión
 app.post('/login', (req, res) => {
