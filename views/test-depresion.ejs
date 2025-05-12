@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Depresión</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #2575fc;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #6a11cb;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test de Depresión</h1>
+        <p>Responde las siguientes preguntas para evaluar tu nivel de depresión. Selecciona una opción para cada pregunta.</p>
+        <form id="testForm">
+            <div id="questions">
+                <!-- Preguntas generadas dinámicamente -->
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-3">Enviar Respuestas</button>
+        </form>
+        <div id="result" class="result d-none">
+            <h2>Resultado</h2>
+            <p id="depressionLevel"></p>
+            <p id="advice"></p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Preguntas del test
+        const questions = [
+            "¿Te sientes triste o vacío la mayor parte del tiempo?",
+            "¿Has perdido interés en actividades que antes disfrutabas?",
+            "¿Tienes dificultades para concentrarte en tus tareas diarias?",
+            "¿Te sientes fatigado o sin energía con frecuencia?",
+            "¿Tienes problemas para dormir o duermes demasiado?",
+            "¿Te sientes inútil o culpable sin razón aparente?",
+            "¿Tienes cambios significativos en tu apetito o peso?",
+            "¿Te cuesta tomar decisiones, incluso las más simples?",
+            "¿Te sientes inquieto o más lento de lo habitual?",
+            "¿Te sientes desconectado de las personas que te rodean?",
+            "¿Tienes pensamientos recurrentes de muerte o suicidio?",
+            "¿Te cuesta disfrutar de las cosas buenas de la vida?",
+            "¿Te sientes constantemente abrumado por tus emociones?",
+            "¿Tienes problemas para manejar el estrés diario?",
+            "¿Te sientes incapaz de cumplir con tus responsabilidades?",
+            "¿Te sientes aislado o solo, incluso cuando estás con otras personas?",
+            "¿Tienes dificultades para expresar tus emociones?",
+            "¿Te sientes desesperanzado sobre el futuro?",
+            "¿Tienes problemas para mantener relaciones saludables?",
+            "¿Sientes que tu estado emocional afecta tu salud física?"
+        ];
+
+        // Generar preguntas dinámicamente
+        const questionsContainer = document.getElementById('questions');
+        questions.forEach((question, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('mb-3');
+            questionDiv.innerHTML = `
+                <label class="form-label">${index + 1}. ${question}</label>
+                <select class="form-select" name="question${index + 1}" required>
+                    <option value="0">Nunca</option>
+                    <option value="1">Rara vez</option>
+                    <option value="2">A veces</option>
+                    <option value="3">Frecuentemente</option>
+                    <option value="4">Siempre</option>
+                </select>
+            `;
+            questionsContainer.appendChild(questionDiv);
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('testForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Calcular el puntaje total
+            const formData = new FormData(this);
+            let totalScore = 0;
+            for (let value of formData.values()) {
+                totalScore += parseInt(value);
+            }
+
+            // Calcular el porcentaje de depresión
+            const maxScore = questions.length * 4; // Puntaje máximo posible
+            const depressionPercentage = Math.round((totalScore / maxScore) * 100);
+
+            // Mostrar el resultado
+            const resultDiv = document.getElementById('result');
+            const depressionLevel = document.getElementById('depressionLevel');
+            const advice = document.getElementById('advice');
+            resultDiv.classList.remove('d-none');
+
+            if (depressionPercentage <= 25) {
+                depressionLevel.textContent = `Tu nivel de depresión es bajo (${depressionPercentage}%).`;
+                advice.textContent = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y busca actividades que te hagan feliz.";
+            } else if (depressionPercentage <= 50) {
+                depressionLevel.textContent = `Tu nivel de depresión es moderado (${depressionPercentage}%).`;
+                advice.textContent = "Intenta hablar con alguien de confianza y realizar actividades que te relajen.";
+            } else if (depressionPercentage <= 75) {
+                depressionLevel.textContent = `Tu nivel de depresión es alto (${depressionPercentage}%).`;
+                advice.textContent = "Considera buscar ayuda profesional para manejar tus emociones de manera efectiva.";
+            } else {
+                depressionLevel.textContent = `Tu nivel de depresión es muy alto (${depressionPercentage}%).`;
+                advice.textContent = "Es importante buscar ayuda profesional de inmediato para cuidar tu salud mental.";
+            }
+        });
+    </script>
+</body>
+</html>

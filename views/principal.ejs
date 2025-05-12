@@ -14,10 +14,31 @@
             font-family: 'Arial', sans-serif;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             text-align: center;
             padding: 20px;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1rem;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .navbar a:hover {
+            color: #6a11cb;
         }
         .container {
             background: rgba(255, 255, 255, 0.1);
@@ -27,6 +48,7 @@
             animation: fadeIn 1.5s ease-in-out;
             max-width: 900px;
             width: 100%;
+            margin-top: 80px;
         }
         h1 {
             font-size: 2.5rem;
@@ -79,6 +101,13 @@
     </style>
 </head>
 <body>
+    <!-- Barra transversal -->
+    <div class="navbar">
+        <a href="/logout" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+        <a href="/ayuda" class="btn btn-info btn-sm">Ayuda</a>
+    </div>
+
+    <!-- Contenido principal -->
     <div class="container">
         <h1>Bienvenido al Sistema de Ayuda Psicológica</h1>
         <p>
@@ -116,7 +145,6 @@
         </div>
         <div class="mt-4">
             <a href="/usuarios" class="btn btn-primary btn-lg">Ver Usuarios</a>
-            <a href="/logout" class="btn btn-secondary btn-lg">Cerrar Sesión</a>
         </div>
     </div>
 </body>
