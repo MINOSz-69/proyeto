@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Estrés</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #2575fc;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #6a11cb;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test de Estrés</h1>
+        <p>Responde las siguientes preguntas para evaluar tu nivel de estrés. Selecciona una opción para cada pregunta.</p>
+        <form id="testForm">
+            <div id="questions">
+                <!-- Preguntas generadas dinámicamente -->
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-3">Enviar Respuestas</button>
+        </form>
+        <div id="result" class="result d-none">
+            <h2>Resultado</h2>
+            <p id="stressLevel"></p>
+            <p id="advice"></p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Preguntas del test
+        const questions = [
+            "¿Te sientes abrumado por tus responsabilidades diarias?",
+            "¿Tienes dificultades para relajarte después de un día ocupado?",
+            "¿Te sientes irritable o impaciente con frecuencia?",
+            "¿Tienes problemas para dormir debido a preocupaciones?",
+            "¿Te cuesta concentrarte en tus tareas?",
+            "¿Sientes que no tienes suficiente tiempo para hacer todo lo que necesitas?",
+            "¿Te sientes físicamente agotado sin razón aparente?",
+            "¿Tienes dolores de cabeza frecuentes o molestias físicas?",
+            "¿Te sientes ansioso o nervioso la mayor parte del tiempo?",
+            "¿Te cuesta disfrutar de actividades que antes te gustaban?",
+            "¿Sientes que no tienes control sobre tu vida?",
+            "¿Te sientes constantemente bajo presión?",
+            "¿Tienes problemas para tomar decisiones?",
+            "¿Te sientes desconectado de las personas que te rodean?",
+            "¿Te cuesta encontrar motivación para tus actividades diarias?",
+            "¿Sientes que no puedes manejar los cambios en tu vida?",
+            "¿Te preocupas constantemente por el futuro?",
+            "¿Te sientes incapaz de cumplir con las expectativas de los demás?",
+            "¿Tienes problemas para mantener una alimentación saludable debido al estrés?",
+            "¿Sientes que tu nivel de estrés afecta tu salud física o mental?"
+        ];
+
+        // Generar preguntas dinámicamente
+        const questionsContainer = document.getElementById('questions');
+        questions.forEach((question, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('mb-3');
+            questionDiv.innerHTML = `
+                <label class="form-label">${index + 1}. ${question}</label>
+                <select class="form-select" name="question${index + 1}" required>
+                    <option value="0">Nunca</option>
+                    <option value="1">Rara vez</option>
+                    <option value="2">A veces</option>
+                    <option value="3">Frecuentemente</option>
+                    <option value="4">Siempre</option>
+                </select>
+            `;
+            questionsContainer.appendChild(questionDiv);
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('testForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Calcular el puntaje total
+            const formData = new FormData(this);
+            let totalScore = 0;
+            for (let value of formData.values()) {
+                totalScore += parseInt(value);
+            }
+
+            // Calcular el porcentaje de estrés
+            const maxScore = questions.length * 4; // Puntaje máximo posible
+            const stressPercentage = Math.round((totalScore / maxScore) * 100);
+
+            // Mostrar el resultado
+            const resultDiv = document.getElementById('result');
+            const stressLevel = document.getElementById('stressLevel');
+            const advice = document.getElementById('advice');
+            resultDiv.classList.remove('d-none');
+
+            if (stressPercentage <= 25) {
+                stressLevel.textContent = `Tu nivel de estrés es bajo (${stressPercentage}%).`;
+                advice.textContent = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y mantén un equilibrio en tu vida.";
+            } else if (stressPercentage <= 50) {
+                stressLevel.textContent = `Tu nivel de estrés es moderado (${stressPercentage}%).`;
+                advice.textContent = "Intenta incorporar actividades relajantes en tu rutina diaria, como meditación o ejercicio.";
+            } else if (stressPercentage <= 75) {
+                stressLevel.textContent = `Tu nivel de estrés es alto (${stressPercentage}%).`;
+                advice.textContent = "Considera hablar con un amigo, familiar o profesional para manejar tu estrés de manera efectiva.";
+            } else {
+                stressLevel.textContent = `Tu nivel de estrés es muy alto (${stressPercentage}%).`;
+                advice.textContent = "Es importante buscar ayuda profesional para manejar tu estrés y cuidar tu salud mental.";
+            }
+        });
+    </script>
+</body>
+</html>

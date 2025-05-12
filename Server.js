@@ -14,19 +14,16 @@ app.get('/', (req, res) => {
 
 // Ruta para guardar un usuario
 app.post('/guardar', (req, res) => {
-    const { nombre, correo, contra } = req.body; // Obtener datos del cuerpo de la solicitud
+    const { nombre, correo, contra } = req.body;
 
-    controlador.guardarUsuario(nombre, correo, contra, (err, results) => {
+    controlador.guardarUsuario(nombre, correo, contra, (err) => {
         if (err) {
-            if (err.message === 'El nombre o el correo ya están registrados') {
-                return res.status(400).send(err.message); // Enviar mensaje de error si hay duplicados
-            }
-            return res.status(500).send('Error al guardar el usuario'); // Error general
+            return res.status(500).send('Error al guardar el usuario');
         }
-        res.send('Usuario guardado con éxito'); // Confirmación de éxito
+        res.redirect('/login'); // Redirigir al formulario de inicio de sesión
+        console.log('Usuario guardado:', { nombre, correo, contra });
     });
 });
-
 // Ruta para mostrar el formulario de actualización
 app.get('/actualizar/:id', (req, res) => {
     const { id } = req.params;
@@ -119,6 +116,28 @@ app.post('/login', (req, res) => {
 app.get('/login', (req, res) => {
     res.render('login'); // Renderizar la vista login.ejs
 });
+
+app.get('/logout', (req, res) => {
+    // Lógica para cerrar sesión (por ejemplo, destruir la sesión)
+    res.redirect('/login'); // Redirigir al formulario de inicio de sesión
+});
+
+app.get('/ayuda', (req, res) => {
+    res.render('ayuda'); // Renderizar la vista ayuda.ejs
+});
+
+app.get('/test-ansiedad', (req, res) => {
+    res.render('test-ansiedad'); // Renderizar la vista test-ansiedad.ejs
+});
+
+app.get('/test-depresion', (req, res) => {
+    res.render('test-depresion'); // Renderizar la vista test-depresion.ejs
+});
+
+app.get('/test-estres', (req, res) => {
+    res.render('test-estres'); // Renderizar la vista test-estres.ejs
+});
+
 
 
 // Ruta para manejar el inicio de sesión
