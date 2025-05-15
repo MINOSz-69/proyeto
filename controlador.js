@@ -1,29 +1,21 @@
 const mysql = require('mysql2');
 
-// Configuración de la conexión a la base de datos
-const connection = mysql.createConnection({
-    host: 'sql5.freesqldatabase.com', // Cambia esto por la dirección de tu servidor de base de datos
-    user: 'sql5778913',      // Cambia esto por tu usuario de base de datos
-    password: 'fnycduQda2',      // Cambia esto por tu contraseña de base de datos
-    database: 'sql5778913' // Cambia esto por el nombre de tu base de datos
+// Configuración del pool de conexiones a la base de datos
+const pool = mysql.createPool({
+    host: 'sql5.freesqldatabase.com',
+    user: 'sql5778913',
+    password: 'fnycduQda2',
+    database: 'sql5778913',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-// Establecer la conexión
-connection.connect((err) => {
-    if (err) {
-        console.error('Error al conectar a la base de datos:', err);
-        return;
-    }
-    console.log('Conexión exitosa a la base de datos');
-
-});
-// Método para guardar un nuevo registro en la base de datos
 // Método para verificar si el nombre o correo ya existen
 function verificarDuplicados(nombre, correo, callback) {
     const query = 'SELECT * FROM usuarios WHERE nombre = ? OR correo = ?';
     const values = [nombre, correo];
-
-    connection.query(query, values, (err, results) => {
+    pool.query(query, values, (err, results) => {
         if (err) {
             console.error('Error al verificar duplicados:', err);
             return callback(err);
@@ -44,11 +36,9 @@ function guardarUsuario(nombre, correo, contra, callback) {
         if (duplicado) {
             return callback(new Error('El nombre o el correo ya están registrados'));
         }
-
         const query = 'INSERT INTO usuarios (nombre, correo, contra) VALUES (?, ?, ?)';
         const values = [nombre, correo, contra];
-
-        connection.query(query, values, (err, results) => {
+        pool.query(query, values, (err, results) => {
             if (err) {
                 console.error('Error al guardar el usuario:', err);
                 return callback(err);
@@ -63,8 +53,7 @@ function guardarUsuario(nombre, correo, contra, callback) {
 function eliminarUsuario(id, callback) {
     const query = 'DELETE FROM usuarios WHERE id = ?';
     const values = [id];
-
-    connection.query(query, values, (err, results) => {
+    pool.query(query, values, (err, results) => {
         if (err) {
             console.error('Error al eliminar el usuario:', err);
             return callback(err);
@@ -80,8 +69,7 @@ function eliminarUsuario(id, callback) {
 // Método para consultar todos los usuarios de la base de datos
 function consultarUsuarios(callback) {
     const query = 'SELECT * FROM usuarios';
-
-    connection.query(query, (err, results) => {
+    pool.query(query, (err, results) => {
         if (err) {
             console.error('Error al consultar los usuarios:', err);
             return callback(err);
@@ -90,12 +78,12 @@ function consultarUsuarios(callback) {
         callback(null, results);
     });
 }
+
 // Método para consultar un usuario por ID
 function consultarUsuarioPorId(id, callback) {
     const query = 'SELECT * FROM usuarios WHERE id = ?';
     const values = [id];
-
-    connection.query(query, values, (err, results) => {
+    pool.query(query, values, (err, results) => {
         if (err) {
             console.error('Error al consultar el usuario:', err);
             return callback(err);
@@ -108,8 +96,7 @@ function consultarUsuarioPorId(id, callback) {
 function actualizarUsuario(id, nombre, correo, callback) {
     const query = 'UPDATE usuarios SET nombre = ?, correo = ? WHERE id = ?';
     const values = [nombre, correo, id];
-
-    connection.query(query, values, (err, results) => {
+    pool.query(query, values, (err, results) => {
         if (err) {
             console.error('Error al actualizar el usuario:', err);
             return callback(err);
@@ -122,8 +109,7 @@ function actualizarUsuario(id, nombre, correo, callback) {
 function buscarUsuarioPorId(id, callback) {
     const query = 'SELECT * FROM usuarios WHERE id = ?';
     const values = [id];
-
-    connection.query(query, values, (err, results) => {
+    pool.query(query, values, (err, results) => {
         if (err) {
             console.error('Error al buscar el usuario:', err);
             return callback(err);
@@ -135,12 +121,12 @@ function buscarUsuarioPorId(id, callback) {
         callback(null, results[0]); // Retornar el primer usuario encontrado
     });
 }
+
 // Método para manejar el inicio de sesión
 function iniciarSesion(correo, contra, callback) {
     const query = 'SELECT * FROM usuarios WHERE correo = ? AND contra = ?';
     const values = [correo, contra];
-
-    connection.query(query, values, (err, results) => {
+    pool.query(query, values, (err, results) => {
         if (err) {
             console.error('Error al iniciar sesión:', err);
             return callback(err);
@@ -153,15 +139,39 @@ function iniciarSesion(correo, contra, callback) {
     });
 }
 
-// Exportar el método
+// Guardar respuestas de un test
+function guardarRespuestasTest(usuario_id, tipo_test, respuestas, resultado, porcentaje, callback) {
+    const query = 'INSERT INTO respuestas_test (usuario_id, tipo_test, respuestas, resultado, porcentaje) VALUES (?, ?, ?, ?, ?)';
+    const values = [usuario_id, tipo_test, JSON.stringify(respuestas), resultado, porcentaje];
+    pool.query(query, values, callback);
+}
+
+// Consultar resultados de test por usuario
+function obtenerResultadosPorUsuario(usuario_id, callback) {
+    const query = 'SELECT * FROM respuestas_test WHERE usuario_id = ? ORDER BY fecha DESC';
+    pool.query(query, [usuario_id], callback);
+}
+
+// Buscar usuario por correo
+function buscarUsuarioPorCorreo(correo, callback) {
+    const query = 'SELECT * FROM usuarios WHERE correo = ?';
+    pool.query(query, [correo], (err, results) => {
+        if (err) return callback(err);
+        if (results.length === 0) return callback(null, null);
+        callback(null, results[0]);
+    });
+}
+
 module.exports = {
-    guardarUsuario,
     verificarDuplicados,
+    guardarUsuario,
     eliminarUsuario,
     consultarUsuarios,
     consultarUsuarioPorId,
     actualizarUsuario,
     buscarUsuarioPorId,
-    iniciarSesion, // Nuevo método exportado
-    // Otros métodos exportados...
+    iniciarSesion,
+    guardarRespuestasTest,
+    obtenerResultadosPorUsuario,
+    buscarUsuarioPorCorreo
 };

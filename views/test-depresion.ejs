@@ -123,24 +123,47 @@
             const maxScore = questions.length * 4; // Puntaje máximo posible
             const depressionPercentage = Math.round((totalScore / maxScore) * 100);
 
+            // Determinar el nivel y consejos
+            let nivel = '';
+            let consejo = '';
+            if (depressionPercentage <= 25) {
+                nivel = `Tu nivel de depresión es bajo (${depressionPercentage}%).`;
+                consejo = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y busca actividades que te hagan feliz.";
+            } else if (depressionPercentage <= 50) {
+                nivel = `Tu nivel de depresión es moderado (${depressionPercentage}%).`;
+                consejo = "Intenta hablar con alguien de confianza y realizar actividades que te relajen.";
+            } else if (depressionPercentage <= 75) {
+                nivel = `Tu nivel de depresión es alto (${depressionPercentage}%).`;
+                consejo = "Considera buscar ayuda profesional para manejar tus emociones de manera efectiva.";
+            } else {
+                nivel = `Tu nivel de depresión es muy alto (${depressionPercentage}%).`;
+                consejo = "Es importante buscar ayuda profesional de inmediato para cuidar tu salud mental.";
+            }
+
             // Mostrar el resultado
             const resultDiv = document.getElementById('result');
             const depressionLevel = document.getElementById('depressionLevel');
             const advice = document.getElementById('advice');
             resultDiv.classList.remove('d-none');
+            depressionLevel.textContent = nivel;
+            advice.textContent = consejo;
 
-            if (depressionPercentage <= 25) {
-                depressionLevel.textContent = `Tu nivel de depresión es bajo (${depressionPercentage}%).`;
-                advice.textContent = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y busca actividades que te hagan feliz.";
-            } else if (depressionPercentage <= 50) {
-                depressionLevel.textContent = `Tu nivel de depresión es moderado (${depressionPercentage}%).`;
-                advice.textContent = "Intenta hablar con alguien de confianza y realizar actividades que te relajen.";
-            } else if (depressionPercentage <= 75) {
-                depressionLevel.textContent = `Tu nivel de depresión es alto (${depressionPercentage}%).`;
-                advice.textContent = "Considera buscar ayuda profesional para manejar tus emociones de manera efectiva.";
-            } else {
-                depressionLevel.textContent = `Tu nivel de depresión es muy alto (${depressionPercentage}%).`;
-                advice.textContent = "Es importante buscar ayuda profesional de inmediato para cuidar tu salud mental.";
+            // Guardar el resultado en la base de datos
+            const correo = prompt("Ingresa tu correo para guardar el resultado:");
+            if (correo) {
+                fetch('/guardar-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correo: correo,
+                        tipo_test: 'depresion',
+                        respuestas: Object.fromEntries(formData.entries()),
+                        resultado: nivel,
+                        porcentaje: depressionPercentage
+                    })
+                })
+                .then(res => res.text())
+                .then(msg => alert(msg));
             }
         });
     </script>

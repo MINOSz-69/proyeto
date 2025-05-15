@@ -9,25 +9,23 @@ app.use(express.urlencoded({ extended: true }));
 
 // Ruta principal para mostrar el formulario
 app.get('/', (req, res) => {
-    res.render('index', { message: 'Hello World!' }); // Renderizar una vista EJS
+    res.render('index');
 });
 
 // Ruta para guardar un usuario
 app.post('/guardar', (req, res) => {
     const { nombre, correo, contra } = req.body;
-
     controlador.guardarUsuario(nombre, correo, contra, (err) => {
         if (err) {
-            return res.status(500).send('Error al guardar el usuario');
+            return res.status(500).send('Error al guardar el usuario: ' + err.message);
         }
         res.redirect('/login'); // Redirigir al formulario de inicio de sesión
-        console.log('Usuario guardado:', { nombre, correo, contra });
     });
 });
+
 // Ruta para mostrar el formulario de actualización
 app.get('/actualizar/:id', (req, res) => {
     const { id } = req.params;
-
     controlador.consultarUsuarioPorId(id, (err, usuario) => {
         if (err) {
             return res.status(500).send('Error al consultar el usuario');
@@ -43,7 +41,6 @@ app.get('/actualizar/:id', (req, res) => {
 app.post('/actualizar/:id', (req, res) => {
     const { id } = req.params;
     const { nombre, correo } = req.body;
-
     controlador.actualizarUsuario(id, nombre, correo, (err, results) => {
         if (err) {
             return res.status(500).send('Error al actualizar el usuario');
@@ -55,14 +52,13 @@ app.post('/actualizar/:id', (req, res) => {
 // Ruta para eliminar un usuario
 app.post('/eliminar/:id', (req, res) => {
     const { id } = req.params;
-
     controlador.eliminarUsuario(id, (err, results) => {
         if (err) {
             return res.status(500).send('Error al eliminar el usuario');
         }
         res.redirect('/usuarios'); // Redirigir a la lista de usuarios
     });
-}); 
+});
 
 // Ruta para consultar todos los usuarios y renderizar la vista
 app.get('/usuarios', (req, res) => {
@@ -73,89 +69,99 @@ app.get('/usuarios', (req, res) => {
         res.render('usuarios', { usuarios: results }); // Renderizar la vista usuarios.ejs con los datos
     });
 });
-// Ruta para consultar un usuario por ID
+
+// Ruta para consultar un usuario por ID y mostrar sus resultados de test
 app.get('/usuario', (req, res) => {
-    const { id } = req.query; // Obtener el ID del parámetro de consulta
-
-    if (!id) {
-        return res.status(400).send('Debe proporcionar un ID para buscar');
-    }
-
+    const { id } = req.query;
+    if (!id) return res.status(400).send('Debe proporcionar un ID para buscar');
     controlador.consultarUsuarioPorId(id, (err, usuario) => {
         if (err) {
-            if (err.message === 'No se encontró un usuario con el ID proporcionado') {
-                return res.status(404).send(err.message);
-            }
             return res.status(500).send('Error al consultar el usuario');
         }
-        res.render('usuario', { usuario }); // Renderizar la vista usuario.ejs con los datos del usuario
+        if (!usuario) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+        controlador.obtenerResultadosPorUsuario(id, (err2, resultados) => {
+            if (err2) return res.status(500).send('Error al consultar los resultados');
+            res.render('usuario', { usuario, resultados: resultados || [] });
+        });
     });
 });
 
-// Ruta para mostrar pagina de principal
+// Ruta para mostrar pagina principal
 app.get('/principal', (req, res) => {
-    res.render('principal'); // Renderizar la vista principal.ejs
+    res.render('principal');
 });
 
 // Ruta para manejar el inicio de sesión
 app.post('/login', (req, res) => {
     const { correo, contra } = req.body;
-
     controlador.iniciarSesion(correo, contra, (err, usuario) => {
         if (err) {
             if (err.message === 'Correo o contraseña incorrectos') {
                 return res.status(401).send(err.message); // Credenciales incorrectas
             }
-            return res.status(500).send('Error al iniciar sesión'); // Error general
+            return res.status(500).send('Error al iniciar sesión');
         }
-        res.render('principal', { usuario }); // Renderizar la vista principal.ejs
+        res.render('principal', { usuario });
     });
 });
 
 // Ruta para mostrar el formulario de inicio de sesión
 app.get('/login', (req, res) => {
-    res.render('login'); // Renderizar la vista login.ejs
+    res.render('login');
 });
 
+// Ruta para cerrar sesión
 app.get('/logout', (req, res) => {
-    // Lógica para cerrar sesión (por ejemplo, destruir la sesión)
-    res.redirect('/login'); // Redirigir al formulario de inicio de sesión
+    // Aquí podrías destruir la sesión si usas sesiones
+    res.redirect('/login');
 });
 
+// Ruta para mostrar la página de ayuda
 app.get('/ayuda', (req, res) => {
-    res.render('ayuda'); // Renderizar la vista ayuda.ejs
+    res.render('ayuda');
 });
 
+// Rutas para los tests
 app.get('/test-ansiedad', (req, res) => {
-    res.render('test-ansiedad'); // Renderizar la vista test-ansiedad.ejs
+    res.render('test-ansiedad');
 });
-
 app.get('/test-depresion', (req, res) => {
-    res.render('test-depresion'); // Renderizar la vista test-depresion.ejs
+    res.render('test-depresion');
 });
-
 app.get('/test-estres', (req, res) => {
-    res.render('test-estres'); // Renderizar la vista test-estres.ejs
+    res.render('test-estres');
 });
 
-
-
-// Ruta para manejar el inicio de sesión
-app.post('/login', (req, res) => {
-    const { correo, contra } = req.body;
-
-    controlador.iniciarSesion(correo, contra, (err, usuario) => {
-        if (err) {
-            if (err.message === 'Correo o contraseña incorrectos') {
-                return res.status(401).send(err.message); // Credenciales incorrectas
-            }
-            return res.status(500).send('Error al iniciar sesión'); // Error general
+// Ruta para guardar respuestas de un test (AJAX desde el frontend)
+app.post('/guardar-test', (req, res) => {
+    const { correo, tipo_test, respuestas, resultado, porcentaje } = req.body;
+    controlador.buscarUsuarioPorCorreo(correo, (err, usuario) => {
+        if (err || !usuario) {
+            return res.status(400).send('Usuario no encontrado');
         }
-        res.send(`Bienvenido, ${usuario.nombre}`); // Respuesta de éxito
+        controlador.guardarRespuestasTest(usuario.id, tipo_test, respuestas, resultado, porcentaje, (err2) => {
+            if (err2) return res.status(500).send('Error al guardar el test');
+            res.send('Respuestas guardadas correctamente');
+        });
     });
+});
+
+// Ruta para recibir comentarios de ayuda
+app.post('/enviar-comentarios', (req, res) => {
+    const { correo, comentarios } = req.body;
+    // Aquí podrías guardar los comentarios en la base de datos o enviarlos por correo
+    console.log(`Comentario recibido de ${correo}: ${comentarios}`);
+    res.send('Gracias por tus comentarios. Nos pondremos en contacto contigo pronto.');
+});
+
+// Ruta para manejar errores 404
+app.use((req, res) => {
+    res.status(404).send('Página no encontrada');
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port http://localhost:${PORT}`);
-}); 
+});

@@ -123,26 +123,51 @@
             const maxScore = questions.length * 4; // Puntaje máximo posible
             const anxietyPercentage = Math.round((totalScore / maxScore) * 100);
 
+            // Determinar el nivel y consejos
+            let nivel = '';
+            let consejo = '';
+            if (anxietyPercentage <= 25) {
+                nivel = `Tu nivel de ansiedad es bajo (${anxietyPercentage}%).`;
+                consejo = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y realiza actividades relajantes.";
+            } else if (anxietyPercentage <= 50) {
+                nivel = `Tu nivel de ansiedad es moderado (${anxietyPercentage}%).`;
+                consejo = "Intenta practicar técnicas de relajación como la meditación o el yoga.";
+            } else if (anxietyPercentage <= 75) {
+                nivel = `Tu nivel de ansiedad es alto (${anxietyPercentage}%).`;
+                consejo = "Considera hablar con un profesional para manejar tu ansiedad de manera efectiva.";
+            } else {
+                nivel = `Tu nivel de ansiedad es muy alto (${anxietyPercentage}%).`;
+                consejo = "Es importante buscar ayuda profesional para cuidar tu salud mental.";
+            }
+
             // Mostrar el resultado
             const resultDiv = document.getElementById('result');
             const anxietyLevel = document.getElementById('anxietyLevel');
             const advice = document.getElementById('advice');
             resultDiv.classList.remove('d-none');
+            anxietyLevel.textContent = nivel;
+            advice.textContent = consejo;
 
-            if (anxietyPercentage <= 25) {
-                anxietyLevel.textContent = `Tu nivel de ansiedad es bajo (${anxietyPercentage}%).`;
-                advice.textContent = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y realiza actividades relajantes.";
-            } else if (anxietyPercentage <= 50) {
-                anxietyLevel.textContent = `Tu nivel de ansiedad es moderado (${anxietyPercentage}%).`;
-                advice.textContent = "Intenta practicar técnicas de relajación como la meditación o el yoga.";
-            } else if (anxietyPercentage <= 75) {
-                anxietyLevel.textContent = `Tu nivel de ansiedad es alto (${anxietyPercentage}%).`;
-                advice.textContent = "Considera hablar con un profesional para manejar tu ansiedad de manera efectiva.";
-            } else {
-                anxietyLevel.textContent = `Tu nivel de ansiedad es muy alto (${anxietyPercentage}%).`;
-                advice.textContent = "Es importante buscar ayuda profesional para cuidar tu salud mental.";
+            // Guardar el resultado en la base de datos
+            const correo = prompt("Ingresa tu correo para guardar el resultado:");
+            if (correo) {
+                fetch('/guardar-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correo: correo,
+                        tipo_test: 'ansiedad',
+                        respuestas: Object.fromEntries(formData.entries()),
+                        resultado: nivel,
+                        porcentaje: anxietyPercentage
+                    })
+                })
+                .then(res => res.text())
+                .then(msg => alert(msg));
             }
         });
+
+ 
     </script>
 </body>
 </html>

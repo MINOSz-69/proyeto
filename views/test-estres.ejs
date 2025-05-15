@@ -98,7 +98,7 @@
             questionDiv.innerHTML = `
                 <label class="form-label">${index + 1}. ${question}</label>
                 <select class="form-select" name="question${index + 1}" required>
-                    <option value="0">  </option>
+                    <option value="0">Nunca</option>
                     <option value="1">Rara vez</option>
                     <option value="2">A veces</option>
                     <option value="3">Frecuentemente</option>
@@ -123,24 +123,47 @@
             const maxScore = questions.length * 4; // Puntaje máximo posible
             const stressPercentage = Math.round((totalScore / maxScore) * 100);
 
+            // Determinar el nivel y consejos
+            let nivel = '';
+            let consejo = '';
+            if (stressPercentage <= 25) {
+                nivel = `Tu nivel de estrés es bajo (${stressPercentage}%).`;
+                consejo = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y mantén un equilibrio en tu vida.";
+            } else if (stressPercentage <= 50) {
+                nivel = `Tu nivel de estrés es moderado (${stressPercentage}%).`;
+                consejo = "Intenta incorporar actividades relajantes en tu rutina diaria, como meditación o ejercicio.";
+            } else if (stressPercentage <= 75) {
+                nivel = `Tu nivel de estrés es alto (${stressPercentage}%).`;
+                consejo = "Considera hablar con un amigo, familiar o profesional para manejar tu estrés de manera efectiva.";
+            } else {
+                nivel = `Tu nivel de estrés es muy alto (${stressPercentage}%).`;
+                consejo = "Es importante buscar ayuda profesional para manejar tu estrés y cuidar tu salud mental.";
+            }
+
             // Mostrar el resultado
             const resultDiv = document.getElementById('result');
             const stressLevel = document.getElementById('stressLevel');
             const advice = document.getElementById('advice');
             resultDiv.classList.remove('d-none');
+            stressLevel.textContent = nivel;
+            advice.textContent = consejo;
 
-            if (stressPercentage <= 25) {
-                stressLevel.textContent = `Tu nivel de estrés es bajo (${stressPercentage}%).`;
-                advice.textContent = "¡Buen trabajo! Continúa cuidando tu bienestar emocional y mantén un equilibrio en tu vida.";
-            } else if (stressPercentage <= 50) {
-                stressLevel.textContent = `Tu nivel de estrés es moderado (${stressPercentage}%).`;
-                advice.textContent = "Intenta incorporar actividades relajantes en tu rutina diaria, como meditación o ejercicio.";
-            } else if (stressPercentage <= 75) {
-                stressLevel.textContent = `Tu nivel de estrés es alto (${stressPercentage}%).`;
-                advice.textContent = "Considera hablar con un amigo, familiar o profesional para manejar tu estrés de manera efectiva.";
-            } else {
-                stressLevel.textContent = `Tu nivel de estrés es muy alto (${stressPercentage}%).`;
-                advice.textContent = "Es importante buscar ayuda profesional para manejar tu estrés y cuidar tu salud mental.";
+            // Guardar el resultado en la base de datos
+            const correo = prompt("Ingresa tu correo para guardar el resultado:");
+            if (correo) {
+                fetch('/guardar-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        correo: correo,
+                        tipo_test: 'estres',
+                        respuestas: Object.fromEntries(formData.entries()),
+                        resultado: nivel,
+                        porcentaje: stressPercentage
+                    })
+                })
+                .then(res => res.text())
+                .then(msg => alert(msg));
             }
         });
     </script>
