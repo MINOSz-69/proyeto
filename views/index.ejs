@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,10 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+            min-height: 100vh;
+        }
         body {
             background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: #fff;
@@ -15,32 +19,84 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            margin: 0;
         }
         .form-container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.13);
+            padding: 35px 30px 25px 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
             animation: fadeIn 1.5s ease-in-out;
+            width: 100%;
+            max-width: 400px;
+            min-width: 260px;
         }
         .form-container h1 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
             font-weight: bold;
+            color: #fff;
         }
-        .form-container input, .form-container button {
-            margin-bottom: 15px;
+        .form-label {
+            font-weight: 500;
+            color: #e0e0e0;
         }
-        .form-container button {
+        .form-control {
+            border-radius: 8px;
+            border: 1.5px solid #bdbdbd;
+            background: rgba(255,255,255,0.18);
+            color: #222;
+            font-size: 1.05rem;
+            transition: border-color 0.3s;
+        }
+        .form-control:focus {
+            border-color: #2575fc;
+            box-shadow: 0 0 0 0.2rem rgba(37,117,252,0.15);
+            background: #fff;
+            color: #222;
+        }
+        .input-group-text {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #2575fc;
+            font-size: 1.2rem;
+            padding-left: 8px;
+            padding-right: 8px;
+            transition: background 0.2s;
+        }
+        .input-group-text:hover, .input-group-text:focus {
+            background: rgba(106,17,203,0.08);
+        }
+        .input-group-text svg {
+            filter: drop-shadow(0 0 2px #2575fc);
+        }
+        .form-check-label {
+            color: #e0e0e0;
+            font-size: 0.97rem;
+        }
+        .btn-primary {
             background-color: #2575fc;
             border: none;
-            transition: background-color 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        .form-container button:hover {
+        .btn-primary:hover {
             background-color: #6a11cb;
         }
+        .btn-secondary {
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
         .error {
-            border: 2px solid red;
+            border: 2px solid #ff5252 !important;
+            background: #fff0f0 !important;
+        }
+        .password-req {
+            font-size: 0.93rem;
+            color: #ffd700;
+            margin-top: -8px;
+            margin-bottom: 10px;
         }
         @keyframes fadeIn {
             from {
@@ -52,47 +108,99 @@
                 transform: translateY(0);
             }
         }
+        @media (max-width: 500px) {
+            .form-container {
+                padding: 18px 5px 15px 5px;
+                min-width: unset;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="form-container col-md-4">
+    <div class="form-container">
         <h1>Registro de Usuario</h1>
-        <form id="registroForm" action="/guardar" method="POST">
-    <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
-    </div>
-    <div class="mb-3">
-        <label for="correo" class="form-label">Correo</label>
-        <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingresa tu correo" required>
-    </div>
-    <div class="mb-3">
-        <label for="contra" class="form-label">Contraseña</label>
-        <input type="password" class="form-control" id="contra" name="contra" placeholder="Crea una contraseña" required>
-        <div class="form-check mt-2">
-            <input class="form-check-input" type="checkbox" id="mostrarContra">
-            <label class="form-check-label" for="mostrarContra">Mostrar contraseña</label>
-        </div>
-    </div>
-    <div class="mb-3">
-        <label for="confirmarContra" class="form-label">Confirmar Contraseña</label>
-        <input type="password" class="form-control" id="confirmarContra" name="confirmarContra" placeholder="Confirma tu contraseña" required>
-    </div>
-    <button type="submit" class="btn btn-primary w-100">Registrar</button>
-</form>
+        <form id="registroForm" action="/guardar" method="POST" autocomplete="off">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
+            </div>
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo</label>
+                <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingresa tu correo" required>
+            </div>
+            <div class="mb-3">
+                <label for="contra" class="form-label">Contraseña</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="contra" name="contra" placeholder="Crea una contraseña" required minlength="8" autocomplete="new-password">
+                    <span class="input-group-text" id="toggleContra" tabindex="0">
+                        <svg id="iconContra" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <ellipse cx="12" cy="12" rx="10" ry="7" stroke="#2575fc" stroke-width="2" fill="#fff" />
+                            <circle cx="12" cy="12" r="3" stroke="#2575fc" stroke-width="2" fill="#6a11cb"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="password-req">Mínimo 8 caracteres, debe incluir letras y números.</div>
+            </div>
+            <div class="mb-3">
+                <label for="confirmarContra" class="form-label">Confirmar Contraseña</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="confirmarContra" name="confirmarContra" placeholder="Confirma tu contraseña" required minlength="8" autocomplete="new-password">
+                    <span class="input-group-text" id="toggleConfirmarContra" tabindex="0">
+                        <svg id="iconConfirmarContra" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <ellipse cx="12" cy="12" rx="10" ry="7" stroke="#2575fc" stroke-width="2" fill="#fff" />
+                            <circle cx="12" cy="12" r="3" stroke="#2575fc" stroke-width="2" fill="#6a11cb"/>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+        </form>
         <a href="/login" class="btn btn-secondary w-100 mt-3">Login</a>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Mostrar u ocultar la contraseña
-        document.getElementById('mostrarContra').addEventListener('change', function () {
+        // Mostrar/ocultar contraseña principal
+        document.getElementById('toggleContra').addEventListener('click', function () {
             const contra = document.getElementById('contra');
-            contra.type = this.checked ? 'text' : 'password';
+            const icon = document.getElementById('iconContra');
+            if (contra.type === "password") {
+                contra.type = "text";
+                icon.innerHTML = `
+                    <ellipse cx="12" cy="12" rx="10" ry="7" stroke="#2575fc" stroke-width="2" fill="#fff"/>
+                    <circle cx="12" cy="12" r="3" stroke="#2575fc" stroke-width="2" fill="#6a11cb"/>
+                    <line x1="5" y1="19" x2="19" y2="5" stroke="#ff5252" stroke-width="2"/>
+                `;
+            } else {
+                contra.type = "password";
+                icon.innerHTML = `
+                    <ellipse cx="12" cy="12" rx="10" ry="7" stroke="#2575fc" stroke-width="2" fill="#fff"/>
+                    <circle cx="12" cy="12" r="3" stroke="#2575fc" stroke-width="2" fill="#6a11cb"/>
+                `;
+            }
+        });
+        // Mostrar/ocultar confirmar contraseña
+        document.getElementById('toggleConfirmarContra').addEventListener('click', function () {
+            const confirmarContra = document.getElementById('confirmarContra');
+            const icon = document.getElementById('iconConfirmarContra');
+            if (confirmarContra.type === "password") {
+                confirmarContra.type = "text";
+                icon.innerHTML = `
+                    <ellipse cx="12" cy="12" rx="10" ry="7" stroke="#2575fc" stroke-width="2" fill="#fff"/>
+                    <circle cx="12" cy="12" r="3" stroke="#2575fc" stroke-width="2" fill="#6a11cb"/>
+                    <line x1="5" y1="19" x2="19" y2="5" stroke="#ff5252" stroke-width="2"/>
+                `;
+            } else {
+                confirmarContra.type = "password";
+                icon.innerHTML = `
+                    <ellipse cx="12" cy="12" rx="10" ry="7" stroke="#2575fc" stroke-width="2" fill="#fff"/>
+                    <circle cx="12" cy="12" r="3" stroke="#2575fc" stroke-width="2" fill="#6a11cb"/>
+                `;
+            }
         });
 
-        // Validar que las contraseñas coincidan antes de enviar el formulario
+        // Validar que las contraseñas coincidan y cumplan requisitos antes de enviar el formulario
         document.getElementById('registroForm').addEventListener('submit', function (e) {
             const contra = document.getElementById('contra');
             const confirmarContra = document.getElementById('confirmarContra');
@@ -101,8 +209,19 @@
             contra.classList.remove('error');
             confirmarContra.classList.remove('error');
 
+            // Validación de contraseña: mínimo 8 caracteres, al menos una letra y un número
+            const passwordValue = contra.value;
+            const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+            if (!regex.test(passwordValue)) {
+                e.preventDefault();
+                alert('La contraseña debe tener al menos 8 caracteres, incluir letras y números.');
+                contra.classList.add('error');
+                return;
+            }
+
             if (contra.value !== confirmarContra.value) {
-                e.preventDefault(); // Evitar el envío del formulario
+                e.preventDefault();
                 alert('Las contraseñas no coinciden. Por favor, verifica.');
                 contra.classList.add('error');
                 confirmarContra.classList.add('error');
