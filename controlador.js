@@ -2,10 +2,10 @@ const mysql = require('mysql2');
 
 // Configuración de la conexión a la base de datos
 const connection = mysql.createConnection({
-    host: 'localhost', // Cambia esto por la dirección de tu servidor de base de datos
-    user: 'root',      // Cambia esto por tu usuario de base de datos
-    password: '',      // Cambia esto por tu contraseña de base de datos
-    database: 'cecypcicos' // Cambia esto por el nombre de tu base de datos
+    host: 'sql5.freesqldatabase.com', // Cambia esto por la dirección de tu servidor de base de datos
+    user: 'sql5778913',      // Cambia esto por tu usuario de base de datos
+    password: 'fnycduQda2',      // Cambia esto por tu contraseña de base de datos
+    database: 'sql5778913' // Cambia esto por el nombre de tu base de datos
 });
 
 // Establecer la conexión
