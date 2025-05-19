@@ -200,14 +200,44 @@
             }
         });
 
-        // Validar que las contraseñas coincidan y cumplan requisitos antes de enviar el formulario
+        // Validar que los campos estén completos y las contraseñas cumplan requisitos antes de enviar el formulario
         document.getElementById('registroForm').addEventListener('submit', function (e) {
+            const nombre = document.getElementById('nombre');
+            const correo = document.getElementById('correo');
             const contra = document.getElementById('contra');
             const confirmarContra = document.getElementById('confirmarContra');
 
             // Resetear estilos de error
+            nombre.classList.remove('error');
+            correo.classList.remove('error');
             contra.classList.remove('error');
             confirmarContra.classList.remove('error');
+
+            // Validar campos vacíos
+            if (!nombre.value.trim()) {
+                e.preventDefault();
+                alert('El nombre es obligatorio.');
+                nombre.classList.add('error');
+                return;
+            }
+            if (!correo.value.trim()) {
+                e.preventDefault();
+                alert('El correo es obligatorio.');
+                correo.classList.add('error');
+                return;
+            }
+            if (!contra.value.trim()) {
+                e.preventDefault();
+                alert('La contraseña es obligatoria.');
+                contra.classList.add('error');
+                return;
+            }
+            if (!confirmarContra.value.trim()) {
+                e.preventDefault();
+                alert('Debes confirmar tu contraseña.');
+                confirmarContra.classList.add('error');
+                return;
+            }
 
             // Validación de contraseña: mínimo 8 caracteres, al menos una letra y un número
             const passwordValue = contra.value;
