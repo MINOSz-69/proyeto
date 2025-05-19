@@ -110,7 +110,7 @@
         </span>
     </div>
     <div>
-        <a href="/ayuda" class="btn btn-info btn-sm me-2">Ayuda</a>
+        <a href="/ayuda?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" class="btn btn-info btn-sm me-2">Ayuda</a>
         <a href="/logout" class="btn btn-danger btn-sm">Cerrar Sesión</a>
     </div>
 </div>
@@ -129,14 +129,13 @@
         <p>
             Aquí podrás encontrar recursos, orientación y herramientas para cuidar tu bienestar emocional y mental.
         </p>
-        ...
         <div class="row">
             <div class="col-md-4">
                 <div class="card">
                     <i class="fas fa-brain icon"></i>
                     <h5>Test de Ansiedad</h5>
                     <p>Evalúa tu nivel de ansiedad con este test rápido.</p>
-                    <a href="/test-ansiedad" class="btn">Realizar Test</a>
+                    <a href="/test-ansiedad?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" class="btn">Realizar Test</a>
                 </div>
             </div>
             <div class="col-md-4">
@@ -144,7 +143,7 @@
                     <i class="fas fa-smile icon"></i>
                     <h5>Test de Depresión</h5>
                     <p>Identifica posibles síntomas de depresión.</p>
-                    <a href="/test-depresion" class="btn">Realizar Test</a>
+                    <a href="/test-depresion?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" class="btn">Realizar Test</a>
                 </div>
             </div>
             <div class="col-md-4">
@@ -152,7 +151,7 @@
                     <i class="fas fa-users icon"></i>
                     <h5>Test de Estrés</h5>
                     <p>Conoce tu nivel de estrés y cómo manejarlo.</p>
-                    <a href="/test-estres" class="btn">Realizar Test</a>
+                    <a href="/test-estres?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" class="btn">Realizar Test</a>
                 </div>
             </div>
         </div>
