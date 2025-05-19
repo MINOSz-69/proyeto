@@ -11,6 +11,10 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
+
+
+
+
 // Método para verificar si el nombre o correo ya existen
 function verificarDuplicados(nombre, correo, callback) {
     const query = 'SELECT * FROM usuarios WHERE nombre = ? OR correo = ?';
@@ -161,8 +165,16 @@ function buscarUsuarioPorCorreo(correo, callback) {
         callback(null, results[0]);
     });
 }
+function obtenerUsuarios(callback) {
+    pool.query('SELECT * FROM usuarios', (err, resultados) => {
+        if (err) return callback(err);
+        callback(null, resultados);
+    });
+}
 
 module.exports = {
+    // ...otras funciones...
+    obtenerUsuarios,
     verificarDuplicados,
     guardarUsuario,
     eliminarUsuario,
