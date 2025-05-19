@@ -8,7 +8,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware para usuario SIN cookies ni ningún otro paquete externo
-// El usuario se enviará por POST o GET en cada petición (por ejemplo, como campo oculto en formularios o query string)
 app.use((req, res, next) => {
     res.locals.usuario = null;
     if (req.body && req.body.usuario) {
@@ -32,39 +31,6 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-// Ruta para guardar un usuario
-app.post('/guardar', (req, res) => {
-    const { nombre, correo, contra } = req.body;
-    controlador.guardarUsuario(nombre, correo, contra, (err) => {
-        if (err) {
-            return res.status(500).send('Error al guardar el usuario: ' + err.message);
-        }
-        res.redirect('/login');
-    });
-});
-
-// Ruta para manejar el inicio de sesión
-app.post('/login', (req, res) => {
-    const { correo, contra } = req.body;
-    // Acceso especial para admin
-    if (correo === 'admin@gmail.com' && contra === 'admin1234') {
-        // Redirige pasando el usuario por query string
-        const usuario = encodeURIComponent(JSON.stringify({ nombre: 'Administrador', correo: correo }));
-        return res.redirect('/usuarios?usuario=' + usuario);
-    }
-    controlador.iniciarSesion(correo, contra, (err, usuario) => {
-        if (err) {
-            if (err.message === 'Correo o contraseña incorrectos') {
-                return res.status(401).send(err.message);
-            }
-            return res.status(500).send('Error al iniciar sesión');
-        }
-        // Redirige pasando el usuario por query string
-        const usuarioStr = encodeURIComponent(JSON.stringify(usuario));
-        res.redirect('/principal?usuario=' + usuarioStr);
-    });
-});
-
 // Ruta para mostrar el formulario de inicio de sesión
 app.get('/login', (req, res) => {
     res.render('login');
@@ -75,14 +41,48 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
+// Registro de usuario (con validación)
+app.post('/guardar', (req, res) => {
+    const { nombre, correo, contra } = req.body;
+    if (!nombre || !correo || !contra) {
+        return res.status(400).send('<script>alert("Todos los campos son obligatorios."); window.history.back();</script>');
+    }
+    controlador.guardarUsuario(nombre, correo, contra, (err) => {
+        if (err) {
+            return res.status(400).send(`<script>alert("${err.message}"); window.history.back();</script>`);
+        }
+        res.redirect('/login');
+    });
+});
+
+// Login de usuario (con validación)
+app.post('/login', (req, res) => {
+    const { correo, contra } = req.body;
+    // Acceso especial para admin
+    if (correo === 'admin@gmail.com' && contra === 'admin1234') {
+        const usuario = encodeURIComponent(JSON.stringify({ nombre: 'Administrador', correo: correo }));
+        return res.redirect('/usuarios?usuario=' + usuario);
+    }
+    if (!correo || !contra) {
+        return res.status(400).send('<script>alert("Correo y contraseña son obligatorios."); window.history.back();</script>');
+    }
+    controlador.iniciarSesion(correo, contra, (err, usuario) => {
+        if (err) {
+            return res.status(400).send(`<script>alert("${err.message}"); window.history.back();</script>`);
+        }
+        res.redirect(`/principal?usuario=${encodeURIComponent(JSON.stringify(usuario))}`);
+    });
+});
+
 // Rutas protegidas: requieren usuario en query o body
 app.get('/principal', (req, res) => {
-    if (!res.locals.usuario) return res.redirect('/login');
+    if (!res.locals.usuario) return res.redirect('/usuarios');
     res.render('principal', { usuario: res.locals.usuario });
 });
 
+// Mostrar todos los usuarios (solo admin)
 app.get('/usuarios', (req, res) => {
-    if (!res.locals.usuario) return res.redirect('/login');
+    if (!res.locals.usuario) return res.redirect('/usuarios');
     controlador.obtenerUsuarios((err, usuarios) => {
         if (err) {
             return res.status(500).send('Error al obtener usuarios');
@@ -91,6 +91,31 @@ app.get('/usuarios', (req, res) => {
     });
 });
 
+// Buscar usuario por ID (para formulario de búsqueda)
+app.get('/usuario', (req, res) => {
+    // El usuario debe venir en el query string como usuario
+    if (!res.locals.usuario) return res.redirect('/login');
+    const id = req.query.id;
+    controlador.consultarUsuarioPorId(id, (err, usuarioBuscado) => {
+        if (err || !usuarioBuscado) {
+            // Si no se encuentra, regresa a la lista de usuarios manteniendo la sesión
+            return res.status(404).send('<script>alert("Usuario no encontrado."); window.location.href="/usuarios?usuario=' + encodeURIComponent(JSON.stringify(res.locals.usuario)) + '";</script>');
+        }
+        // Muestra la tabla con el usuario encontrado y mantiene la sesión
+        res.render('usuarios', { usuarios: [usuarioBuscado], usuario: res.locals.usuario });
+    });
+});
+// Mostrar formulario de actualización de usuario
+app.get('/actualizar/:id', (req, res) => {
+    if (!res.locals.usuario) return res.redirect('/login'); // Corregido: redirige a login si no hay usuario
+    const id = req.params.id;
+    controlador.consultarUsuarioPorId(id, (err, usuario) => {
+        if (err || !usuario) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+        res.render('actualizar', { usuario });
+    });
+});
 // Mostrar página de ayuda
 app.get('/ayuda', (req, res) => {
     res.render('ayuda', { usuario: res.locals.usuario });
@@ -98,21 +123,21 @@ app.get('/ayuda', (req, res) => {
 
 // Mostrar tests
 app.get('/test-depresion', (req, res) => {
-    if (!res.locals.usuario) return res.redirect('/login');
+    if (!res.locals.usuario) return res.redirect('/principal');
     res.render('test-depresion', { usuario: res.locals.usuario });
 });
 app.get('/test-ansiedad', (req, res) => {
-    if (!res.locals.usuario) return res.redirect('/login');
+    if (!res.locals.usuario) return res.redirect('/principal');
     res.render('test-ansiedad', { usuario: res.locals.usuario });
 });
 app.get('/test-estres', (req, res) => {
-    if (!res.locals.usuario) return res.redirect('/login');
+    if (!res.locals.usuario) return res.redirect('/principal');
     res.render('test-estres', { usuario: res.locals.usuario });
 });
 
 // Guardar respuestas de test (ejemplo para depresión)
 app.post('/test-depresion', (req, res) => {
-    if (!res.locals.usuario) return res.redirect('/login');
+    if (!res.locals.usuario) return res.redirect('/principal');
     const respuestas = req.body.respuestas || req.body;
     const resultado = 'Leve'; // Ejemplo, reemplaza con tu lógica
     const porcentaje = 50;    // Ejemplo, reemplaza con tu lógica
@@ -125,7 +150,6 @@ app.post('/test-depresion', (req, res) => {
         porcentaje,
         (err) => {
             if (err) return res.status(500).send('Error al guardar el test');
-            // Redirige pasando el usuario por query string
             const usuarioStr = encodeURIComponent(JSON.stringify(res.locals.usuario));
             res.redirect('/resultados?usuario=' + usuarioStr);
         }
@@ -134,40 +158,10 @@ app.post('/test-depresion', (req, res) => {
 
 // Mostrar historial de resultados del usuario
 app.get('/resultados', (req, res) => {
-    if (!res.locals.usuario) return res.redirect('/login');
+    if (!res.locals.usuario) return res.redirect('/usuarios');
     controlador.obtenerResultadosPorUsuario(res.locals.usuario.id, (err, resultados) => {
         if (err) return res.status(500).send('Error al obtener resultados');
         res.render('resultados', { resultados, usuario: res.locals.usuario });
-    });
-});
-// Ejemplo para server.js o tus rutas principales
-
-// Registro de usuario
-app.post('/guardar', (req, res) => {
-    const { nombre, correo, contra } = req.body;
-    if (!nombre || !correo || !contra) {
-        return res.status(400).send('<script>alert("Todos los campos son obligatorios."); window.history.back();</script>');
-    }
-    controlador.guardarUsuario(nombre, correo, contra, (err, result) => {
-        if (err) {
-            return res.status(400).send(`<script>alert("${err.message}"); window.history.back();</script>`);
-        }
-        res.redirect('/login');
-    });
-});
-
-// Login de usuario
-app.post('/login', (req, res) => {
-    const { correo, contra } = req.body;
-    if (!correo || !contra) {
-        return res.status(400).send('<script>alert("Correo y contraseña son obligatorios."); window.history.back();</script>');
-    }
-    controlador.iniciarSesion(correo, contra, (err, usuario) => {
-        if (err) {
-            return res.status(400).send(`<script>alert("${err.message}"); window.history.back();</script>`);
-        }
-        // Redirige a principal con el usuario en query string
-        res.redirect(`/principal?usuario=${encodeURIComponent(JSON.stringify(usuario))}`);
     });
 });
 
