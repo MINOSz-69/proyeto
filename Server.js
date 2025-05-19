@@ -140,6 +140,36 @@ app.get('/resultados', (req, res) => {
         res.render('resultados', { resultados, usuario: res.locals.usuario });
     });
 });
+// Ejemplo para server.js o tus rutas principales
+
+// Registro de usuario
+app.post('/guardar', (req, res) => {
+    const { nombre, correo, contra } = req.body;
+    if (!nombre || !correo || !contra) {
+        return res.status(400).send('<script>alert("Todos los campos son obligatorios."); window.history.back();</script>');
+    }
+    controlador.guardarUsuario(nombre, correo, contra, (err, result) => {
+        if (err) {
+            return res.status(400).send(`<script>alert("${err.message}"); window.history.back();</script>`);
+        }
+        res.redirect('/login');
+    });
+});
+
+// Login de usuario
+app.post('/login', (req, res) => {
+    const { correo, contra } = req.body;
+    if (!correo || !contra) {
+        return res.status(400).send('<script>alert("Correo y contraseña son obligatorios."); window.history.back();</script>');
+    }
+    controlador.iniciarSesion(correo, contra, (err, usuario) => {
+        if (err) {
+            return res.status(400).send(`<script>alert("${err.message}"); window.history.back();</script>`);
+        }
+        // Redirige a principal con el usuario en query string
+        res.redirect(`/principal?usuario=${encodeURIComponent(JSON.stringify(usuario))}`);
+    });
+});
 
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;
