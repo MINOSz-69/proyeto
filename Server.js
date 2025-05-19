@@ -1,4 +1,5 @@
 const express = require('express');
+const session = require('express-session');
 const app = express();
 const controlador = require('./controlador'); // Importar métodos del controlador
 
@@ -7,7 +8,20 @@ app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta principal para mostrar el formulario
+// Configurar sesiones
+app.use(session({
+    secret: 'secreto_super_seguro',
+    resave: false,
+    saveUninitialized: true
+}));
+
+// Middleware para pasar usuario a todas las vistas
+app.use((req, res, next) => {
+    res.locals.usuario = req.session.usuario;
+    next();
+});
+
+// Ruta principal para mostrar el formulario de registro
 app.get('/', (req, res) => {
     res.render('index');
 });
@@ -33,7 +47,7 @@ app.get('/actualizar/:id', (req, res) => {
         if (!usuario) {
             return res.status(404).send('Usuario no encontrado');
         }
-        res.render('actualizar', { usuario }); // Renderizar la vista actualizar.ejs con los datos del usuario
+        res.render('actualizar', { usuario });
     });
 });
 
@@ -45,7 +59,7 @@ app.post('/actualizar/:id', (req, res) => {
         if (err) {
             return res.status(500).send('Error al actualizar el usuario');
         }
-        res.redirect('/usuarios'); // Redirigir a la lista de usuarios
+        res.redirect('/usuarios');
     });
 });
 
@@ -56,7 +70,7 @@ app.post('/eliminar/:id', (req, res) => {
         if (err) {
             return res.status(500).send('Error al eliminar el usuario');
         }
-        res.redirect('/usuarios'); // Redirigir a la lista de usuarios
+        res.redirect('/usuarios');
     });
 });
 
@@ -66,7 +80,7 @@ app.get('/usuarios', (req, res) => {
         if (err) {
             return res.status(500).send('Error al consultar los usuarios');
         }
-        res.render('usuarios', { usuarios: results }); // Renderizar la vista usuarios.ejs con los datos
+        res.render('usuarios', { usuarios: results });
     });
 });
 
@@ -96,14 +110,20 @@ app.get('/principal', (req, res) => {
 // Ruta para manejar el inicio de sesión
 app.post('/login', (req, res) => {
     const { correo, contra } = req.body;
+    // Acceso especial para admin
+    if (correo === 'admin@gmail.com' && contra === 'admin1234') {
+        req.session.usuario = { nombre: 'Administrador', correo: correo };
+        return res.redirect('/usuarios');
+    }
     controlador.iniciarSesion(correo, contra, (err, usuario) => {
         if (err) {
             if (err.message === 'Correo o contraseña incorrectos') {
-                return res.status(401).send(err.message); // Credenciales incorrectas
+                return res.status(401).send(err.message);
             }
             return res.status(500).send('Error al iniciar sesión');
         }
-        res.render('principal', { usuario });
+        req.session.usuario = usuario;
+        res.redirect('/principal');
     });
 });
 
@@ -114,8 +134,9 @@ app.get('/login', (req, res) => {
 
 // Ruta para cerrar sesión
 app.get('/logout', (req, res) => {
-    // Aquí podrías destruir la sesión si usas sesiones
-    res.redirect('/login');
+    req.session.destroy(() => {
+        res.redirect('/login');
+    });
 });
 
 // Ruta para mostrar la página de ayuda
@@ -123,7 +144,7 @@ app.get('/ayuda', (req, res) => {
     res.render('ayuda');
 });
 
-// Rutas para los tests
+// Rutas para los tests (el usuario estará disponible en res.locals.usuario)
 app.get('/test-ansiedad', (req, res) => {
     res.render('test-ansiedad');
 });
