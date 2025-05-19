@@ -47,27 +47,29 @@
     </style>
 </head>
 <body>
-    <!-- Agrega esto al inicio del <body> de cada test -->
-<div class="navbar d-flex justify-content-between align-items-center" style="background: rgba(0,0,0,0.7); padding: 10px 20px; position: fixed; top: 0; width: 100%; z-index: 1000;">
-    <div>
-        <span style="color:#fff; font-weight:bold; font-size:1.1rem;">
-            <i class="fas fa-user-circle"></i>
-            <%= usuario && usuario.nombre ? usuario.nombre : 'Usuario' %>
-        </span>
+    <!-- Navbar con usuario y enlaces que mantienen la sesión por query string -->
+    <div class="navbar d-flex justify-content-between align-items-center" style="background: rgba(0,0,0,0.7); padding: 10px 20px; position: fixed; top: 0; width: 100%; z-index: 1000;">
+        <div>
+            <span style="color:#fff; font-weight:bold; font-size:1.1rem;">
+                <i class="fas fa-user-circle"></i>
+                <%= usuario && usuario.nombre ? usuario.nombre : 'Usuario' %>
+            </span>
+        </div>
+        <div>
+            <a href="/principal?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" class="btn btn-light btn-sm me-2">Menú</a>
+            <a href="/ayuda?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" class="btn btn-info btn-sm">Ayuda</a>
+        </div>
     </div>
-    <div>
-        <a href="/principal" class="btn btn-light btn-sm me-2">Menú</a>
-        <a href="/ayuda" class="btn btn-info btn-sm">Ayuda</a>
-    </div>
-</div>
-<!-- Agrega un margin-top al .container para que no quede tapado -->
-<style>
-    .container { margin-top: 80px !important; }
-</style>
+    <!-- Agrega un margin-top al .container para que no quede tapado -->
+    <style>
+        .container { margin-top: 80px !important; }
+    </style>
     <div class="container">
         <h1>Test de Depresión</h1>
         <p>Responde las siguientes preguntas para evaluar tu nivel de depresión. Selecciona una opción para cada pregunta.</p>
-        <form id="testForm">
+        <!-- Formulario que mantiene la sesión del usuario -->
+        <form id="testForm" method="POST" action="/test-depresion?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>">
+            <input type="hidden" name="usuario" value='<%= JSON.stringify(usuario) %>'>
             <div id="questions">
                 <!-- Preguntas generadas dinámicamente -->
             </div>
@@ -165,23 +167,23 @@
             depressionLevel.textContent = nivel;
             advice.textContent = consejo;
 
-            // Guardar el resultado en la base de datos
-            const correo = prompt("Ingresa tu correo para guardar el resultado:");
-            if (correo) {
-                fetch('/guardar-test', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        correo: correo,
-                        tipo_test: 'depresion',
-                        respuestas: Object.fromEntries(formData.entries()),
-                        resultado: nivel,
-                        porcentaje: depressionPercentage
-                    })
+            // Guardar el resultado en la base de datos (opcional, si tienes endpoint)
+            // Puedes enviar el usuario como parte del body si lo necesitas
+            /*
+            fetch('/guardar-test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usuario: <%= JSON.stringify(usuario) %>,
+                    tipo_test: 'depresion',
+                    respuestas: Object.fromEntries(formData.entries()),
+                    resultado: nivel,
+                    porcentaje: depressionPercentage
                 })
-                .then(res => res.text())
-                .then(msg => alert(msg));
-            }
+            })
+            .then(res => res.text())
+            .then(msg => alert(msg));
+            */
         });
     </script>
 </body>

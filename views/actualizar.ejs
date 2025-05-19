@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +22,8 @@
             border-radius: 15px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             animation: fadeIn 1.5s ease-in-out;
-            width: 50%;
+            width: 100%;
+            max-width: 450px;
         }
         .form-container h1 {
             text-align: center;
@@ -55,7 +56,8 @@
 <body>
     <div class="form-container">
         <h1>Actualizar Usuario</h1>
-        <form action="/actualizar/<%= usuario.id %>" method="POST">
+        <form action="/actualizar/<%= usuario.id %>?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" method="POST">
+            <input type="hidden" name="usuario" value='<%= JSON.stringify(usuario) %>'>
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="nombre" name="nombre" value="<%= usuario.nombre %>" required>
@@ -66,6 +68,7 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Actualizar</button>
         </form>
+        <a href="/principal?usuario=<%= encodeURIComponent(JSON.stringify(usuario)) %>" class="btn btn-secondary w-100 mt-2">Cancelar</a>
     </div>
 </body>
 </html>
